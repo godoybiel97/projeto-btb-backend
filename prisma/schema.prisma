@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Participant {
+  id               String            @id @default(uuid())
+  name             String
+  username         String            @unique
+  avatar           String
+  eliminated       Boolean           @default(false)
+  gameParticipants GameParticipant[]
+}
+
+model Game {
+  id               String            @id @default(uuid())
+  isAtive          Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  gameParticipants GameParticipant[]
+}
+
+model GameParticipant {
+  id            String      @id @default(uuid())
+  game          Game        @relation(fields: [gameId], references: [id])
+  gameId        String
+  participant   Participant @relation(fields: [participantId], references: [id])
+  participantId String
+  vote          Vote[]
+
+  @@unique([gameId, participantId])
+}
+
+model Vote {
+  id                String          @id @default(uuid())
+  gameParticipant   GameParticipant @relation(fields: [gameParticipantId], references: [id])
+  gameParticipantId String
+}
